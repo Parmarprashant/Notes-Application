@@ -71,5 +71,8 @@ notes-app/
 You can find the full API documentation here:
 [Postman API Documentation](https://documenter.getpostman.com/view/50841493/2sBXqDsNUH)
 
+Deploy Link: 
+[Live Link](https://notes-application-2-n5ow.onrender.com/).
+
 ---
 *Developed by Prashant Parmar*
