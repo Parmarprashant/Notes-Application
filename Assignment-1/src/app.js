@@ -5,6 +5,10 @@ const noteRoutes = require('./routes/note.routes');
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+    res.send("welcome to my notes application");
+});
+
 app.use('/api/notes', noteRoutes);
 
 // Error handling middleware
