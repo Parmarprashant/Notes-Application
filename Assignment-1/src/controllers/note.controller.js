@@ -51,6 +51,7 @@ exports.getAllNotes = async (req, res) => {
             data: null
         });
     }
+}
 // 4. Get note by ID
 exports.getNoteById = async (req, res) => {
     try {
@@ -77,6 +78,56 @@ exports.getNoteById = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Note fetched successfully",
+            data: note
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            data: null
+        });
+    }
+}
+// 5. Replace note completely (PUT)
+exports.replaceNote = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Note ID format",
+                data: null
+            });
+        }
+
+        const { title, content, category, isPinned } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({
+                success: false,
+                message: "Title and content are required for full replacement",
+                data: null
+            });
+        }
+
+        const note = await Note.findByIdAndUpdate(
+            id,
+            { title, content, category, isPinned },
+            { new: true, overwrite: true, runValidators: true }
+        );
+
+        if (!note) {
+            return res.status(404).json({
+                success: false,
+                message: "Note not found",
+                data: null
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Note replaced successfully",
             data: note
         });
     } catch (error) {
