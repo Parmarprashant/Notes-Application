@@ -137,6 +137,7 @@ exports.replaceNote = async (req, res) => {
             data: null
         });
     }
+}
 // 6. Update specific fields (PATCH)
 exports.updateNote = async (req, res) => {
     try {
@@ -176,6 +177,41 @@ exports.updateNote = async (req, res) => {
             success: true,
             message: "Note updated successfully",
             data: note
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            data: null
+        });
+    }
+// 7. Delete single note
+exports.deleteNote = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Note ID format",
+                data: null
+            });
+        }
+
+        const note = await Note.findByIdAndDelete(id);
+
+        if (!note) {
+            return res.status(404).json({
+                success: false,
+                message: "Note not found",
+                data: null
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Note deleted successfully",
+            data: null
         });
     } catch (error) {
         res.status(500).json({
