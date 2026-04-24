@@ -158,11 +158,37 @@ const getNoteById = async (req, res) => {
 };
 
 const replaceNote = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { id } = req.params;
+    const { title, content, category, isPinned } = req.body;
+
+    if (!isValidObjectId(id)) {
+      return sendError(res, 400, "Invalid note ID");
+    }
+
+    if (!title || !content) {
+      return sendError(res, 400, "Title and content are required");
+    }
+
+    const replacedNote = await Note.findOneAndReplace(
+      { _id: id },
+      {
+        title,
+        content,
+        category: category || "personal",
+        isPinned: typeof isPinned === "boolean" ? isPinned : false,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!replacedNote) {
+      return sendError(res, 404, "Note not found");
+    }
+
+    return sendSuccess(res, 200, "Note replaced successfully", replacedNote);
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const updateNote = async (req, res) => {
