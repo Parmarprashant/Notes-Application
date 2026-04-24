@@ -372,11 +372,29 @@ const filterNotes = async (req, res) => {
 };
 
 const getPinnedNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const filter = { isPinned: true };
+
+    if (req.query.category) {
+      if (!isAllowedCategory(req.query.category)) {
+        return sendError(
+          res,
+          400,
+          "Invalid category. Allowed: work, personal, study"
+        );
+      }
+
+      filter.category = req.query.category;
+    }
+
+    const notes = await Note.find(filter);
+
+    return sendSuccess(res, 200, "Pinned notes fetched successfully", notes, {
+      count: notes.length,
+    });
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const filterByCategory = async (req, res) => {
