@@ -105,11 +105,24 @@ const createNote = async (req, res) => {
 };
 
 const createBulkNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { notes } = req.body;
+
+    if (!Array.isArray(notes) || notes.length === 0) {
+      return sendError(res, 400, "notes array is required and cannot be empty");
+    }
+
+    const createdNotes = await Note.insertMany(notes);
+
+    return sendSuccess(
+      res,
+      201,
+      `${createdNotes.length} notes created successfully`,
+      createdNotes
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const getAllNotes = async (req, res) => {
