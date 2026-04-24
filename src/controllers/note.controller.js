@@ -263,11 +263,33 @@ const deleteBulkNotes = async (req, res) => {
 };
 
 const getNotesByCategory = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { category } = req.params;
+
+    if (!isAllowedCategory(category)) {
+      return sendError(
+        res,
+        400,
+        "Invalid category. Allowed: work, personal, study"
+      );
+    }
+
+    const notes = await Note.find({ category });
+
+    if (notes.length === 0) {
+      return sendError(res, 404, `No notes found for category: ${category}`);
+    }
+
+    return sendSuccess(
+      res,
+      200,
+      `Notes fetched for category: ${category}`,
+      notes,
+      { count: notes.length }
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const getNotesByStatus = async (req, res) => {
