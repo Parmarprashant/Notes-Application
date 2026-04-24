@@ -192,11 +192,31 @@ const replaceNote = async (req, res) => {
 };
 
 const updateNote = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    if (!isValidObjectId(id)) {
+      return sendError(res, 400, "Invalid note ID");
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return sendError(res, 400, "No fields provided to update");
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedNote) {
+      return sendError(res, 404, "Note not found");
+    }
+
+    return sendSuccess(res, 200, "Note updated successfully", updatedNote);
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const deleteNote = async (req, res) => {
