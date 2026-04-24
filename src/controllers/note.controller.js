@@ -336,11 +336,39 @@ const getNoteSummary = async (req, res) => {
 };
 
 const filterNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const filter = {};
+
+    if (req.query.category) {
+      if (!isAllowedCategory(req.query.category)) {
+        return sendError(
+          res,
+          400,
+          "Invalid category. Allowed: work, personal, study"
+        );
+      }
+
+      filter.category = req.query.category;
+    }
+
+    if (req.query.isPinned !== undefined) {
+      const pinned = parsePinnedValue(req.query.isPinned);
+
+      if (pinned === null) {
+        return sendError(res, 400, "isPinned must be true or false");
+      }
+
+      filter.isPinned = pinned;
+    }
+
+    const notes = await Note.find(filter);
+
+    return sendSuccess(res, 200, "Notes fetched successfully", notes, {
+      count: notes.length,
+    });
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const getPinnedNotes = async (req, res) => {
