@@ -240,11 +240,26 @@ const deleteNote = async (req, res) => {
 };
 
 const deleteBulkNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return sendError(res, 400, "ids array is required and cannot be empty");
+    }
+
+    const result = await Note.deleteMany({
+      _id: { $in: ids },
+    });
+
+    return sendSuccess(
+      res,
+      200,
+      `${result.deletedCount} notes deleted successfully`,
+      null
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const getNotesByCategory = async (req, res) => {
