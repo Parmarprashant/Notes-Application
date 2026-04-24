@@ -84,11 +84,24 @@ const getSortConfig = (query) => {
 };
 
 const createNote = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { title, content, category, isPinned } = req.body;
+
+    if (!title || !content) {
+      return sendError(res, 400, "Title and content are required");
+    }
+
+    const note = await Note.create({
+      title,
+      content,
+      category,
+      isPinned,
+    });
+
+    return sendSuccess(res, 201, "Note created successfully", note);
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const createBulkNotes = async (req, res) => {
