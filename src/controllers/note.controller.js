@@ -480,11 +480,28 @@ const paginateNotes = async (req, res) => {
 };
 
 const paginateByCategory = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { category } = req.params;
+
+    if (!isAllowedCategory(category)) {
+      return sendError(
+        res,
+        400,
+        "Invalid category. Allowed: work, personal, study"
+      );
+    }
+
+    const { page, limit, skip } = getPaginationValues(req.query);
+    const filter = { category };
+    const total = await Note.countDocuments(filter);
+    const notes = await Note.find(filter).skip(skip).limit(limit);
+
+    return sendSuccess(res, 200, `Notes fetched for category: ${category}`, notes, {
+      pagination: getPaginationData(total, page, limit),
+    });
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const sortNotes = async (req, res) => {
