@@ -126,11 +126,15 @@ const createBulkNotes = async (req, res) => {
 };
 
 const getAllNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const notes = await Note.find();
+
+    return sendSuccess(res, 200, "Notes fetched successfully", notes, {
+      count: notes.length,
+    });
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const getNoteById = async (req, res) => {
