@@ -466,11 +466,17 @@ const filterByDateRange = async (req, res) => {
 };
 
 const paginateNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { page, limit, skip } = getPaginationValues(req.query);
+    const total = await Note.countDocuments();
+    const notes = await Note.find().skip(skip).limit(limit);
+
+    return sendSuccess(res, 200, "Notes fetched successfully", notes, {
+      pagination: getPaginationData(total, page, limit),
+    });
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const paginateByCategory = async (req, res) => {
