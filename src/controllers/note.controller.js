@@ -138,11 +138,23 @@ const getAllNotes = async (req, res) => {
 };
 
 const getNoteById = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return sendError(res, 400, "Invalid note ID");
+    }
+
+    const note = await Note.findById(id);
+
+    if (!note) {
+      return sendError(res, 404, "Note not found");
+    }
+
+    return sendSuccess(res, 200, "Note fetched successfully", note);
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const replaceNote = async (req, res) => {
