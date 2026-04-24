@@ -293,11 +293,26 @@ const getNotesByCategory = async (req, res) => {
 };
 
 const getNotesByStatus = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const pinned = parsePinnedValue(req.params.isPinned);
+
+    if (pinned === null) {
+      return sendError(res, 400, "isPinned must be true or false");
+    }
+
+    const notes = await Note.find({ isPinned: pinned });
+    const statusLabel = pinned ? "pinned" : "unpinned";
+
+    return sendSuccess(
+      res,
+      200,
+      `Fetched all ${statusLabel} notes`,
+      notes,
+      { count: notes.length }
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const getNoteSummary = async (req, res) => {
