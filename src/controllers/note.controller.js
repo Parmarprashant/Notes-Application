@@ -398,11 +398,33 @@ const getPinnedNotes = async (req, res) => {
 };
 
 const filterByCategory = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { name } = req.query;
+
+    if (!name) {
+      return sendError(res, 400, "Query param 'name' is required");
+    }
+
+    if (!isAllowedCategory(name)) {
+      return sendError(
+        res,
+        400,
+        "Invalid category. Allowed: work, personal, study"
+      );
+    }
+
+    const notes = await Note.find({ category: name });
+
+    return sendSuccess(
+      res,
+      200,
+      `Notes filtered by category: ${name}`,
+      notes,
+      { count: notes.length }
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const filterByDateRange = async (req, res) => {
