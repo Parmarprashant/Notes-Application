@@ -505,11 +505,29 @@ const paginateByCategory = async (req, res) => {
 };
 
 const sortNotes = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { sortBy, order, orderLabel } = getSortConfig(req.query);
+
+    if (!allowedSortFields.includes(sortBy)) {
+      return sendError(
+        res,
+        400,
+        "Invalid sortBy. Allowed: title, createdAt, updatedAt, category"
+      );
+    }
+
+    const notes = await Note.find().sort({ [sortBy]: order });
+
+    return sendSuccess(
+      res,
+      200,
+      `Notes sorted by ${sortBy} in ${orderLabel} order`,
+      notes,
+      { count: notes.length }
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const sortPinnedNotes = async (req, res) => {
