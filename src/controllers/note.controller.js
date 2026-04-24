@@ -428,11 +428,41 @@ const filterByCategory = async (req, res) => {
 };
 
 const filterByDateRange = async (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: "Not implemented yet",
-    data: null,
-  });
+  try {
+    const { from, to } = req.query;
+
+    if (!from || !to) {
+      return sendError(
+        res,
+        400,
+        "Both 'from' and 'to' query params are required"
+      );
+    }
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+
+    if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
+      return sendError(res, 400, "Invalid date range");
+    }
+
+    const notes = await Note.find({
+      createdAt: {
+        $gte: fromDate,
+        $lte: toDate,
+      },
+    });
+
+    return sendSuccess(
+      res,
+      200,
+      `Notes fetched between ${from} and ${to}`,
+      notes,
+      { count: notes.length }
+    );
+  } catch (error) {
+    return handleServerError(res, error);
+  }
 };
 
 const paginateNotes = async (req, res) => {
