@@ -4,7 +4,18 @@ const noteRoutes = require("./routes/note.routes");
 const app = express();
 
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Notes API is running",
+    data: {
+      availableRoutes: ["/api/notes", "/notes"],
+    },
+  });
+});
+
 app.use("/api/notes", noteRoutes);
+app.use("/notes", noteRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
